@@ -4,10 +4,6 @@ define('MerchantId', '38130');
 define('UserName', 'prizma');
 define('Password', 'HFM58tseb');
 
-//define('CustomerId', '8027711');
-//define('MerchantId', '16728');
-//define('UserName', 'prizma');
-//define('Password', '571420Pm');
 class ControllerExtensionPaymentWebpos extends Controller {
 	public function index() {
 		$this->load->language('extension/payment/webpos');
@@ -191,7 +187,7 @@ class ControllerExtensionPaymentWebpos extends Controller {
 		$order_info = $this->model_checkout_order->getOrder($this->session->data['order_id']);
 		$banks=$this->config->get('payment_webpos_banks_info');
 		//$bank_id=$this->session->data['webpos_bank_id'];
-		$bank_id=1;
+		$bank_id=1; // we should get the bank id automatically
 
 		$webpos_bank=array();
 		$webpos_class='';

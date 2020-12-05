@@ -261,7 +261,7 @@ class ControllerExtensionPaymentWebpos extends Controller {
 					break;
 				
 				default:
-					$factor = (float) $connect_web->Currency[0]->BanknoteSelling;
+					$factor = 1;
 					break;
 			}
 		    //$amount=$bank['total']*100*$factor;

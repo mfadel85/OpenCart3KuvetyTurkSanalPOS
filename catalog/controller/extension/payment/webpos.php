@@ -335,6 +335,13 @@ class ControllerExtensionPaymentWebpos extends Controller {
 
 		//$order_id=$this->request->post['oid'];
 		$order_id=$this->session->data['order_id'];
+		//print_r("<br>session data<br>");
+		//print_r($this->session->data);
+		//print_r("<br>session data ends <br>");
+		//print_r("<br>session <br>");
+		//print_r($this->session);
+		//print_r("<br>session data <br>");		
+		// it is about getting order id if we get it correctly we are good
 		
 		$bank_response=$this->request->post;
 		$banks=$this->config->get('payment_webpos_banks_info');
@@ -349,21 +356,24 @@ class ControllerExtensionPaymentWebpos extends Controller {
 		$webpos_bank['order_info'] = $this->model_checkout_order->getOrder($order_id);
 		$webpos_bank['products']=$this->getOrderProducts();
 		$method_response=array();
-				print_r($webpos_bank['method'].$webpos_bank['model']);
+		//print_r("<BR>Name is : ".$webpos_bank['method'].$webpos_bank['model']."<BR>");
 
 		$method_response=$this->{'webpos_'.$webpos_bank['method'].$webpos_bank['model']}->bankResponse($bank_response,$webpos_bank);
 		//die((string)$method_response);
+		//print_r("<br>method_response<br>");
         error_log($method_response['result'], 0);
 		error_log('Satış: '.$method_response['result'].' ', 3, "kk.log");
-		print_r($method_response);
+		//print_r($method_response);
+	    //print_r("<br>method_response ends <br>");
+
 		if ($method_response['result']==1){
 			//echo "<pre>";print_r($method_response);exit();		
 		    error_log('Test1: '.$method_response['result'].' ', 0);
 
 			$message=$method_response['message'].$webpos_bank['name'];
 		    error_log('Test1.1: '.$method_response['result'].' ', 0);
-
-			$this->model_checkout_order->addOrderHistory($order_id, $this->config->get('payment_webpos_order_status_id'), $message,false);
+			$order_id = $method_response['order_id'];
+			$this->model_checkout_order->addOrderHistory($order_id, 5, $message,false);
 		    error_log('Test1.3: '.$method_response['result'].' ', 0);
 
 			unset($this->session->data['order_id']);
@@ -397,9 +407,9 @@ class ControllerExtensionPaymentWebpos extends Controller {
 			$data['continue'] = $this->url->link('checkout/failure');
 			$data['message']=$method_response['message'];
 			if (file_exists(DIR_TEMPLATE . $this->config->get('config_template') . '/template/payment/webpos_failure')) {
-				$this->response->setOutput($this->load->view($this->config->get('config_template') . '/template/payment/webpos_failure', $data));
+				//$this->response->setOutput($this->load->view($this->config->get('config_template') . '/template/payment/webpos_failure', $data));
 			} else {
-				$this->response->setOutput($this->load->view('default/template/extension/payment/webpos_failure', $data));
+				//$this->response->setOutput($this->load->view('default/template/extension/payment/webpos_failure', $data));
 			}
 			//
 		}

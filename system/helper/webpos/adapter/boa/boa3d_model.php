@@ -118,72 +118,79 @@ class boa3dModel {
         $UserName="prizma"; // Web Yönetim ekranalrindan olusturulan api rollü kullanici
 		$Password="HFM58tseb";// Web Yönetim ekranalrindan olusturulan api rollü kullanici sifresi
 		$HashedPassword = base64_encode(sha1($Password,"ISO-8859-9")); //md5($Password);	
-	    $HashData = base64_encode(sha1($MerchantId.$MerchantOrderId.$Amount.$UserName.$HashedPassword , "ISO-8859-9"));
-	    print_r($bank_response);
-			if ((string)$bank_response->ResponseCode =="00"){
-				$response['message'].='3D Onayı Başarılı.<br/>';
-				
-				$xml='<KuveytTurkVPosMessage xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-				  <HashData>'.$HashData.'</HashData>
-				<MerchantId>'.$MerchantId.'</MerchantId>
-				<CustomerId>'.$CustomerId.'</CustomerId>
-				<UserName>'.$UserName.'</UserName>
-				<TransactionType>Sale</TransactionType>
-				<InstallmentCount>'.(string)$bank_response->VPosMessage->InstallmentCount.'</InstallmentCount>
-				<Amount>'.$Amount.'</Amount>
-				<MerchantOrderId>'.(string)$bank_response->VPosMessage->MerchantOrderId.'</MerchantOrderId>
-				<TransactionSecurity>3</TransactionSecurity>
-				<KuveytTurkVPosAdditionalData>
-				<AdditionalData>
-					<Key>MD</Key>
-					<Data>'.(string)$bank_response->MD.'</Data>
-				</AdditionalData>
-				</KuveytTurkVPosAdditionalData>
-				</KuveytTurkVPosMessage>';
-		
-				$resopnseCodeDebug = (string)$bank_response->ResponseCode;
-				error_log('Test6: '.$resopnseCodeDebug.' ', 0);
-
-				
-				$xml_response=$this->xmlonayla($xml);
-				$xml = simplexml_load_string($xml_response);
-				//print_r($xml);
-				
-				$ReasonCode=(string)$xml->ResponseCode;
-				$Response=(string)$xml->ResponseMessage;
-				//echo "<pre>";print_r($data);exit;
-				error_log('Test8: '.$Response.' ', 0);
-
-				//print_r("ResponseCode".$ReasonCode."<br>");
-				//print_r("ResponseMessage".$Response."<br>");
-				//die();				
-				// test ediyorum 
-				//if($ReasonCode =="00" || $Response == "Kart doğrulandı") {
-				if($ReasonCode =="00") {
-					$response['result']=1;
-					$response['message'].='Ödeme Başarılı<br/>';
-					error_log('Test7: '.$response['message'].' ', 0);
-
-					//$response['message'].='AuthCode : '.(string)$xml->Transaction->Response->AuthCode.'<br/>';
-					$response['message'].='Response : '.$Response.'<br/>';
-				} else {
-				error_log('Test8: '.$ReasonCode.' - '.$Response.' ', 0);
-
-					$response['result']=0;
-					$response['message'].='Ödeme Başarısız.<br/>';
-					$response['message'].='Response : '.$Response.'<br/>';
-					//$response['message'].='ErrMsg : '.(string)$xml->Transaction->Response->SysErrMsg.'<br/>';
-					//$response['message'].='ErrCode : '.(string)$xml->Transaction->Response->Code.'<br/>';
-				}
+		$HashData = base64_encode(sha1($MerchantId.$MerchantOrderId.$Amount.$UserName.$HashedPassword , "ISO-8859-9"));
+		//print_r('<br>Bank Response<br>');
+		//print_r($bank_response);
+		//print_r('<br>Bank Response ends<br>');
+		if ((string)$bank_response->ResponseCode =="00"){
+			$response['message'].='3D Onayı Başarılı.<br/>';
 			
+			$xml='<KuveytTurkVPosMessage xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+				<HashData>'.$HashData.'</HashData>
+			<MerchantId>'.$MerchantId.'</MerchantId>
+			<CustomerId>'.$CustomerId.'</CustomerId>
+			<UserName>'.$UserName.'</UserName>
+			<TransactionType>Sale</TransactionType>
+			<InstallmentCount>'.(string)$bank_response->VPosMessage->InstallmentCount.'</InstallmentCount>
+			<Amount>'.$Amount.'</Amount>
+			<MerchantOrderId>'.(string)$bank_response->VPosMessage->MerchantOrderId.'</MerchantOrderId>
+			<TransactionSecurity>3</TransactionSecurity>
+			<KuveytTurkVPosAdditionalData>
+			<AdditionalData>
+				<Key>MD</Key>
+				<Data>'.(string)$bank_response->MD.'</Data>
+			</AdditionalData>
+			</KuveytTurkVPosAdditionalData>
+			</KuveytTurkVPosMessage>';
+	
+			$resopnseCodeDebug = (string)$bank_response->ResponseCode;
+			error_log('Test6: '.$resopnseCodeDebug.' ', 0);
+
+			
+			$xml_response=$this->xmlonayla($xml);
+			$xml = simplexml_load_string($xml_response);
+			//print_r($xml);
+			
+			$ReasonCode=(string)$xml->ResponseCode;
+			$Response=(string)$xml->ResponseMessage;
+			//echo "<pre>";print_r($data);exit;
+			error_log('Test8: '.$Response.' ', 0);
+
+			//print_r("ResponseCode".$ReasonCode."<br>");
+			//print_r("ResponseMessage".$Response."<br>");
+			//die();				
+			// test ediyorum 
+			//if($ReasonCode =="00" || $Response == "Kart doğrulandı") {
+			if($ReasonCode =="00") {
+				$response['result']=1;
+				$response['message'].='Ödeme Başarılı<br/>';
+				//(string)$bank_response->VPosMessage->MerchantOrderId
+				$response['order_id'] = (string)$bank_response->VPosMessage->MerchantOrderId;
+				error_log('Test7: '.$response['message'].' ', 0);
+
+				//$response['message'].='AuthCode : '.(string)$xml->Transaction->Response->AuthCode.'<br/>';
+				$response['message'].='Response : '.$Response.'<br/>';
 			} else {
+			error_log('Test8: '.$ReasonCode.' - '.$Response.' ', 0);
+
 				$response['result']=0;
-				$response['message'].='3D doğrulama başarısız<br/>';
-				$response['message'].=$bank_response['mderrormessage'];
-				
+				$response['message'].='Ödeme Başarısız.<br/>';
+				$response['order_id'] = (string)$bank_response->VPosMessage->MerchantOrderId;
+
+				$response['message'].='Response : '.$Response.'<br/>';
+				//$response['message'].='ErrMsg : '.(string)$xml->Transaction->Response->SysErrMsg.'<br/>';
+				//$response['message'].='ErrCode : '.(string)$xml->Transaction->Response->Code.'<br/>';
 			}
 		
-		print_r($response);
+		} else {
+			$response['result']=0;
+			$response['order_id'] = (string)$bank_response->VPosMessage->MerchantOrderId;
+			$response['message'].='3D doğrulama başarısız<br/>';
+			$response['message'].=$bank_response['mderrormessage'];
+			
+		}
+		
+		//print_r($response);
 		return $response;
 	}
 	private function xmlSend($fields,$odeme=false){		
